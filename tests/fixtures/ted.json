@@ -1,0 +1,28 @@
+{
+  "notices": [
+    {
+      "id": "684352-2026",
+      "notice-title": "Rehabilitation of water treatment plant in Marrakech",
+      "publication-date": "2026-11-05",
+      "performance-country": ["MA"],
+      "buyer-name": "Office National de l'Eau Potable",
+      "short-description": "Works contract for rehabilitation of a municipal water treatment plant.",
+      "closing-date": "2026-12-01",
+      "value-amount": 2400000,
+      "value-currency": "EUR",
+      "links": [{"href": "https://ted.europa.eu/en/notice/-/detail/684352-2026"}]
+    },
+    {
+      "id": "684999-2026",
+      "notice-title": "Framework contract for health logistics support",
+      "publication-date": "2026-11-02",
+      "performance-country": ["KE", "TZ"],
+      "buyer-name": "Regional Health Authority",
+      "short-description": "Framework agreement for medical logistics.",
+      "closing-date": "2026-12-10",
+      "value-amount": 900000,
+      "value-currency": "USD",
+      "links": []
+    }
+  ]
+}

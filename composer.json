@@ -1,0 +1,17 @@
+{
+    "name": "tenderhunter/tenderhunter",
+    "description": "Aggregate tender notices & funding opportunities from Africa/MENA sources",
+    "require": {
+        "php": ">=8.2",
+        "phpmailer/phpmailer": "^6.9",
+        "stripe/stripe-php": "^23.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Tendari\\": "src/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true
+    }
+}

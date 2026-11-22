@@ -1,0 +1,46 @@
+{
+  "rows": 2,
+  "os": 0,
+  "page": 1,
+  "total": 8597,
+  "procnotices": [
+    {
+      "id": "OP00481016",
+      "notice_type": "Request for Expression of Interest",
+      "notice_status": "Published",
+      "noticedate": "13-Nov-2026",
+      "submission_deadline_date": "2026-11-30T00:00:00Z",
+      "project_ctry_name": "Ethiopia",
+      "project_id": "P180076",
+      "project_name": "Lowlands Livelihood Resilience Project, Phase Two (LLRP II)",
+      "bid_reference_no": "ET-AFR-RPCU-569666-CS-QCBS",
+      "bid_description": "Procurement of consultancy service construction supervision of irrigation schemes",
+      "procurement_method_name": "Quality And Cost-Based Selection",
+      "contact_organization": "Ministry of Irrigation and Lowlands",
+      "notice_text": "<p>Request for Expression of Interest</p><p>Country: Ethiopia</p>"
+    },
+    {
+      "id": "OP00481017",
+      "notice_type": "Invitation for Bids",
+      "notice_status": "Published",
+      "noticedate": "12-Nov-2026",
+      "submission_deadline_date": "2026-12-08T00:00:00Z",
+      "project_ctry_name": "Cambodia",
+      "project_id": "P180664",
+      "project_name": "Second Higher Education Improvement Project",
+      "bid_reference_no": "MOEYS-HEIP2-NUBB-NCB-W-009",
+      "bid_description": "Construction of Training and Incubation Building for Student Learning",
+      "procurement_method_name": "Request for Bids",
+      "contact_organization": "Ministry of Education"
+    },
+    {
+      "id": "OP00481018",
+      "notice_type": "Contract Award",
+      "notice_status": "Published",
+      "noticedate": "10-Nov-2026",
+      "project_ctry_name": "Nigeria",
+      "bid_description": "Procurement of Flexible Accounting Software",
+      "contact_organization": "Nasarawa State NFWP"
+    }
+  ]
+}

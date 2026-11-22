@@ -1,0 +1,33 @@
+{
+  "time": "2026-11-10T12:00:00+00:00",
+  "count": 2,
+  "data": [
+    {
+      "id": 3584231,
+      "score": 1.0,
+      "fields": {
+        "id": 3584231,
+        "title": "National Consultant - WASH Cluster Coordination",
+        "url": "https://reliefweb.int/job/3584231/national-consultant-wash-cluster",
+        "date": {"created": "2026-11-09T08:30:00+00:00", "published": "2026-11-09T08:30:00+00:00", "closing": "2026-11-20"},
+        "country": [{"name": "Somalia", "iso3": "SOM", "location": {"lat": 2.0, "lon": 45.3}}],
+        "source": [{"shortname": "UNICEF", "name": "UNICEF"}],
+        "description_text": "<p>The consultant will support WASH cluster coordination in Somalia.</p>",
+        "_resource": "jobs"
+      }
+    },
+    {
+      "id": 3584232,
+      "score": 1.0,
+      "fields": {
+        "id": 3584232,
+        "title": "Water Quality Analysis Training 2026",
+        "url": "https://reliefweb.int/training/3584232/water-quality-analysis",
+        "date": {"created": "2026-11-08T09:00:00+00:00"},
+        "country": [{"name": "Kenya", "iso3": "KEN"}],
+        "source": [{"shortname": "RedR UK"}],
+        "_resource": "training"
+      }
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "name": "Tendari",
+  "short_name": "Tendari",
+  "description": "Tender notices and funding opportunities across Africa and the Middle East.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1f7a5c",
+  "icons": [
+    { "src": "/assets/favicon/favicon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "/assets/favicon/favicon-96x96.png", "sizes": "96x96", "type": "image/png" },
+    { "src": "/assets/favicon/web-app-manifest-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/favicon/web-app-manifest-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/favicon/web-app-manifest-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/assets/favicon/web-app-manifest-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

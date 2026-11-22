@@ -1,0 +1,12 @@
+storage/
+!storage/migrations/
+!storage/logs/.gitkeep
+!storage/cache/.gitkeep
+vendor/
+node_modules/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+storage/cache/ratelimit/
+.DS_Store
+enhancement.md
