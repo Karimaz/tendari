@@ -83,6 +83,14 @@ final class Db
         $dir = self::migrationsDir();
         $files = is_dir($dir) ? glob($dir . '/*.sql') : [];
         sort($files);
+        if ($files === []) {
+            $hasSources = self::q("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'sources'")->fetch();
+            if (!$hasSources) {
+                throw new \RuntimeException(
+                    'No migrations found in ' . $dir . '. storage/migrations must be committed to the repository.'
+                );
+            }
+        }
         $ran = [];
         foreach ($files as $file) {
             $name = basename($file);
