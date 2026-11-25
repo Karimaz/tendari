@@ -12,6 +12,13 @@ $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 <title><?= e($title) ?> · Tendari</title>
 <meta name="csrf" content="<?= e(\Tendari\Core\Auth::csrfToken()) ?>">
 <meta name="description" content="Tendari aggregates public tenders and funding calls across Africa and the Middle East into one searchable feed with email and Telegram alerts.">
+<link rel="icon" href="/assets/favicon/favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="/assets/favicon/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+<link rel="manifest" href="/assets/favicon/site.webmanifest">
+<meta name="theme-color" content="#1f7a5c">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
@@ -25,7 +32,7 @@ $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
   <div class="container wide">
     <div class="navbar-brand">
       <a class="navbar-item brandmark" href="/">
-        <span class="logo-badge"></span>
+        <img class="logo-mark" src="/logo.svg" alt="" width="34" height="34">
         <span class="word">tendari<span class="dot">.</span></span>
       </a>
       <a role="button" class="navbar-burger" data-target="nav-menu" aria-label="menu" aria-expanded="false">
@@ -77,7 +84,7 @@ $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
     <div class="columns">
       <div class="column is-5">
         <div class="foot-brand brandmark mb-3">
-          <span class="logo-badge">T</span>
+          <img class="logo-mark is-on-dark" src="/logo.svg" alt="" width="34" height="34">
           <span class="word">tendari<span class="dot">.</span></span>
         </div>
         <p class="is-size-7" style="max-width:22rem;color:#8aa0b5;">Tender notices &amp; funding opportunities across Africa &amp; the Middle East — one feed, your filters, instant alerts.</p>

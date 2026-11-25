@@ -141,12 +141,10 @@ h1, h2, h3, .title, .hero .subtitle, .display {
 [dir="rtl"] .brandmark .word { letter-spacing: 0; }
 [dir="rtl"] .table th, [dir="rtl"] .table td { text-align: right; }
 
-.logo-badge {
-  width: 34px; height: 34px; border-radius: 10px; flex: none;
-  display: grid; place-items: center;
-  background: linear-gradient(135deg, var(--teal-2), var(--navy) 130%);
-  color: #fff; font-weight: 800; font-size: 1rem;
-  box-shadow: 0 4px 12px rgba(10, 168, 119, .35);
+.logo-mark { width: 34px; height: 34px; flex: none; object-fit: contain; }
+.site-footer .logo-mark {
+  width: 30px; height: 30px; padding: 4px;
+  background: #fff; border-radius: 10px;
 }
 
 .navbar .navbar-burger span { height: 2px; border-radius: 2px; }
