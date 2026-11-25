@@ -1,0 +1,118 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo, pdo_sqlite, sqlite3, curl, mbstring, dom, json
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Run tests
+        run: php tests/run.php
+
+  deploy:
+    name: Deploy
+    needs: test
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo, pdo_sqlite, sqlite3, curl, mbstring, dom, json
+          coverage: none
+
+      - name: Build dependencies (vendor/)
+        run: composer install --no-interaction --prefer-dist --no-dev --optimize-autoloader
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
+
+      - name: Trust the VPS host key
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_PORT: ${{ secrets.VPS_PORT }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+        run: |
+          PORT="${VPS_PORT:-22}"
+          mkdir -p ~/.ssh
+          if [ -n "${VPS_KNOWN_HOSTS:-}" ]; then
+            printf '%s\n' "$VPS_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          else
+            ssh-keyscan -p "$PORT" -H "$VPS_HOST" >> ~/.ssh/known_hosts
+          fi
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Sync files to VPS
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_PORT: ${{ secrets.VPS_PORT }}
+          DEPLOY_PATH: ${{ secrets.VPS_DEPLOY_PATH }}
+        run: |
+          PORT="${VPS_PORT:-22}"
+          rsync -az --delete \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='.env' \
+            --exclude='node_modules' \
+            --exclude='storage/app.sqlite' \
+            --exclude='storage/app.sqlite-*' \
+            --exclude='storage/cache/' \
+            --exclude='storage/logs/' \
+            --exclude='storage/tenders/' \
+            -e "ssh -p $PORT" \
+            ./ "$VPS_USER@$VPS_HOST:$DEPLOY_PATH/"
+
+      - name: Post-deploy (migrations + permissions)
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_PORT: ${{ secrets.VPS_PORT }}
+          DEPLOY_PATH: ${{ secrets.VPS_DEPLOY_PATH }}
+        run: |
+          PORT="${VPS_PORT:-22}"
+          ssh -p "$PORT" "$VPS_USER@$VPS_HOST" "bash -s" <<REMOTE
+          set -euo pipefail
+          cd "$DEPLOY_PATH"
+          mkdir -p storage/cache/ratelimit storage/logs storage/tenders
+          php cron/migrate.php
+          chmod -R ug+rwX storage
+          # If PHP-FPM runs as another user, make storage writable for it, e.g.:
+          # sudo chown -R www-data:www-data storage
+          # Optional OPcache/FPM reload (needs sudoers rule):
+          # sudo systemctl reload php8.3-fpm
+          REMOTE
+
+      - name: Health check
+        if: ${{ env.SITE_URL != '' }}
+        env:
+          SITE_URL: ${{ secrets.SITE_URL }}
+        run: curl -fsS --retry 5 --retry-delay 3 --max-time 15 "$SITE_URL" -o /dev/null

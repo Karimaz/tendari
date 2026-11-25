@@ -40,6 +40,34 @@ Key points: document root **must** be `public/` (so `storage/`, `config/`, `src/
 web-accessible), `fastcgi_pass` must point at your PHP-FPM socket/port, and the config sets
 `application/manifest+json` for `.webmanifest`, cached static assets, and denies dotfiles.
 
+### GitHub Actions deploy → VPS
+
+`.github/workflows/deploy.yml` runs the test suite and, on a push to `main` (or manual
+dispatch), rsyncs the repo to the VPS and runs migrations. Add these repository secrets
+(Settings → Secrets and variables → Actions):
+
+| Secret | Example | Purpose |
+| --- | --- | --- |
+| `VPS_HOST` | `203.0.113.10` | Server IP or hostname |
+| `VPS_USER` | `deploy` | SSH user (member of the PHP-FPM group) |
+| `VPS_PORT` | `22` | SSH port (optional, defaults to 22) |
+| `VPS_SSH_KEY` | `-----BEGIN OPENSSH PRIVATE KEY-----…` | Private key for `VPS_USER` |
+| `VPS_DEPLOY_PATH` | `/var/www/tendari` | Directory containing `public/` |
+| `SITE_URL` | `https://tendari.org` | Optional post-deploy health check |
+| `VPS_KNOWN_HOSTS` | output of `ssh-keyscan -H your.server` | Optional pinned host key (recommended; otherwise the workflow runs `ssh-keyscan` on first deploy) |
+
+The workflow:
+1. runs `composer install` + `php tests/run.php` (fails the deploy if tests fail),
+2. syncs files with rsync, **preserving** `storage/app.sqlite*`, `storage/cache`, `storage/logs`
+   and `storage/tenders` (plus any server-side `.env`),
+3. runs `php cron/migrate.php` and fixes `storage/` permissions on the server.
+
+Configure PHP-FPM environment variables from [`deploy/php-fpm.env.example`](deploy/php-fpm.env.example)
+(the app reads config via `getenv()`, not a `.env` file). Ensure the PHP-FPM user can write to
+`storage/` — either deploy as that user or set the `storage/` group writable and add the deploy
+user to it. If your PHP version/socket differs, adjust `fastcgi_pass` in `deploy/nginx.conf`
+and the optional FPM reload line in the workflow.
+
 ### Environment variables (secrets — never commit)
 
 | Var | Purpose |
