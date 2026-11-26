@@ -65,7 +65,7 @@ dispatch), rsyncs the repo to the VPS and runs migrations. Add these repository 
 | `VPS_PORT` | `22` | SSH port (optional, defaults to 22) |
 | `VPS_SSH_KEY` | `-----BEGIN OPENSSH PRIVATE KEY-----…` | Private key for `VPS_USER` |
 | `VPS_DEPLOY_PATH` | `/var/www/tendari` | Directory containing `public/` |
-| `SITE_URL` | `https://tendari.org` | Optional post-deploy health check |
+| `SITE_URL` | `https://tendari.org/health` | Optional post-deploy health check (JSON 200 when app + DB are healthy) |
 | `VPS_KNOWN_HOSTS` | output of `ssh-keyscan -H your.server` | Optional pinned host key (recommended; otherwise the workflow runs `ssh-keyscan` on first deploy) |
 
 The workflow:

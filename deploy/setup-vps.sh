@@ -76,6 +76,10 @@ case "$DOMAIN" in www.*) ;; *) SERVER_NAMES="$DOMAIN www.$DOMAIN" ;; esac
 CONF=/etc/nginx/sites-available/tendari.conf
 if [ -f "$CONF" ] && grep -q 'ssl_certificate' "$CONF"; then
   echo "    Existing TLS-enabled config kept (delete $CONF to re-render)."
+  if grep -q 'include fastcgi_params;' "$CONF" && ! grep -q 'fastcgi_param REQUEST_URI' "$CONF"; then
+    perl -0pi -e 's/(include fastcgi_params;\n)/$1        fastcgi_param REQUEST_URI \$request_uri;\n/' "$CONF"
+    echo "    Pinned fastcgi REQUEST_URI in existing config"
+  fi
 else
   sed -e "s#/var/www/tendari/public#${APP_DIR}/public#g" \
       -e "s#server_name tendari.org www.tendari.org;#server_name ${SERVER_NAMES};#g" \

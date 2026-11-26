@@ -33,6 +33,24 @@ Auth::boot();
 $app = new App();
 
 /* ------------------------------------------------------------------ *
+ * Health probe (no auth) — used by monitoring / deploy checks
+ * ------------------------------------------------------------------ */
+$app->get('/health', function () {
+    try {
+        $tenders = (int)Db::scalar('SELECT COUNT(*) FROM tenders');
+        $sources = (int)Db::scalar('SELECT COUNT(*) FROM sources');
+        json_out([
+            'status' => 'ok',
+            'tenders' => $tenders,
+            'sources' => $sources,
+            'time' => gmdate('c'),
+        ]);
+    } catch (\Throwable $e) {
+        json_out(['status' => 'error', 'message' => 'database unavailable'], 503);
+    }
+});
+
+/* ------------------------------------------------------------------ *
  * Language switch (cookie + back to previous page)
  * ------------------------------------------------------------------ */
 $app->get('/lang/{code}', function ($params) {

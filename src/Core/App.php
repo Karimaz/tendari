@@ -32,6 +32,16 @@ final class App
     {
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
         $uri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+
+        // Some nginx + PHP-FPM setups pass the front controller as the URI
+        // after the directory-index rewrite (e.g. /index.php or /index.php/foo).
+        if ($uri === '/index.php' || str_starts_with($uri, '/index.php/')) {
+            $uri = substr($uri, strlen('/index.php'));
+            if ($uri === '' || $uri === false) {
+                $uri = '/';
+            }
+        }
+
         $path = '/' . trim(preg_replace('#^' . preg_quote($this->base, '#') . '#', '', $uri), '/');
         if (strlen($path) > 1) {
             $path = rtrim($path, '/');
