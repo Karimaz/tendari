@@ -86,6 +86,13 @@ The health-check step is **non-fatal** (`continue-on-error`): a TLS/DNS problem 
 as a workflow warning with certificate diagnostics but does not roll back a successful
 deploy. Set `SITE_URL` to `http://…` (or leave it unset) until HTTPS is configured.
 
+> **Troubleshooting:** if `nginx -t` reports `unexpected "{" in /etc/nginx/mime.types`, an
+> older rendered config is still enabled — `deploy/nginx.conf` used to include
+> `mime.types` inside a `types {}` block (invalid). Re-render it with the current template:
+> `sudo bash deploy/setup-vps.sh --skip-packages --domain tendari.org --app-dir "$PWD"`.
+> If certbot already obtained the certificate but could not install it, run
+> `sudo certbot install --cert-name tendari.org` after the config loads cleanly.
+
 Configure PHP-FPM environment variables from [`deploy/php-fpm.env.example`](deploy/php-fpm.env.example)
 (the app reads config via `getenv()`, not a `.env` file). Ensure the PHP-FPM user can write to
 `storage/` — either deploy as that user or set the `storage/` group writable and add the deploy

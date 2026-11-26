@@ -58,16 +58,43 @@ chown -R "$DEPLOY_USER":www-data "$APP_DIR"
 chmod -R ug+rwX "$APP_DIR/storage"
 chmod 755 "$APP_DIR"
 
+echo "==> PHP-FPM socket"
+if [ ! -S "/run/php/php${PHP_VERSION}-fpm.sock" ]; then
+  ALT_SOCK="$(ls /run/php/php*-fpm.sock 2>/dev/null | head -1 || true)"
+  if [ -n "$ALT_SOCK" ]; then
+    DETECTED="$(basename "$ALT_SOCK" | sed -E 's/^php(.*)-fpm\.sock$/\1/')"
+    echo "    php${PHP_VERSION} socket missing; detected PHP ${DETECTED} ($ALT_SOCK)"
+    PHP_VERSION="$DETECTED"
+  else
+    echo "!! No php-fpm socket under /run/php — is PHP-FPM installed/running?"
+  fi
+fi
+
 echo "==> Installing nginx server block"
 SERVER_NAMES="$DOMAIN"
 case "$DOMAIN" in www.*) ;; *) SERVER_NAMES="$DOMAIN www.$DOMAIN" ;; esac
-sed -e "s#/var/www/tendari/public#${APP_DIR}/public#g" \
-    -e "s#server_name tendari.org www.tendari.org;#server_name ${SERVER_NAMES};#g" \
-    -e "s#php8.3-fpm.sock#php${PHP_VERSION}-fpm.sock#g" \
-    "$NGINX_SRC" > /etc/nginx/sites-available/tendari.conf
-ln -sf /etc/nginx/sites-available/tendari.conf /etc/nginx/sites-enabled/tendari.conf
+CONF=/etc/nginx/sites-available/tendari.conf
+if [ -f "$CONF" ] && grep -q 'ssl_certificate' "$CONF"; then
+  echo "    Existing TLS-enabled config kept (delete $CONF to re-render)."
+else
+  sed -e "s#/var/www/tendari/public#${APP_DIR}/public#g" \
+      -e "s#server_name tendari.org www.tendari.org;#server_name ${SERVER_NAMES};#g" \
+      -e "s#php8.3-fpm.sock#php${PHP_VERSION}-fpm.sock#g" \
+      "$NGINX_SRC" > "$CONF"
+fi
+ln -sf "$CONF" /etc/nginx/sites-enabled/tendari.conf
+if ! grep -Rqs 'sites-enabled' /etc/nginx/nginx.conf; then
+  echo "    nginx does not include sites-enabled/*; installing into conf.d/ instead"
+  rm -f /etc/nginx/sites-enabled/tendari.conf
+  cp "$CONF" /etc/nginx/conf.d/tendari.conf
+fi
 nginx -t
-systemctl reload nginx
+systemctl reload nginx || systemctl restart nginx
+if nginx -T 2>/dev/null | grep -q "server_name .*${DOMAIN}"; then
+  echo "    Loaded server block for $DOMAIN"
+else
+  echo "!! nginx does not report a server_name for $DOMAIN — check $( [ -f /etc/nginx/conf.d/tendari.conf ] && echo /etc/nginx/conf.d/tendari.conf || echo "$CONF")"
+fi
 
 echo "==> PHP-FPM environment (edit values!)"
 POOL="/etc/php/${PHP_VERSION}/fpm/pool.d/www.conf"
@@ -104,18 +131,22 @@ else
   echo "    Code not present yet — run the GitHub deploy, then: php $APP_DIR/cron/migrate.php"
 fi
 
-if [ -n "$EMAIL" ]; then
+CERT_DOMAINS=(-d "$DOMAIN")
+case "$DOMAIN" in
+  www.*) CERT_DOMAINS+=(-d "${DOMAIN#www.}") ;;
+  *)     CERT_DOMAINS+=(-d "www.$DOMAIN") ;;
+esac
+if [ -f "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" ]; then
+  echo "==> Certificate already exists — installing it into nginx"
+  certbot install --cert-name "$DOMAIN" --non-interactive \
+    || echo "!! certbot install failed; verify the server block is loaded (nginx -T | grep server_name) then: certbot install --cert-name $DOMAIN"
+elif [ -n "$EMAIL" ]; then
   echo "==> Let's Encrypt certificate"
-  CERT_DOMAINS=(-d "$DOMAIN")
-  case "$DOMAIN" in
-    www.*) CERT_DOMAINS+=(-d "${DOMAIN#www.}") ;;
-    *)     CERT_DOMAINS+=(-d "www.$DOMAIN") ;;
-  esac
   certbot --nginx "${CERT_DOMAINS[@]}" --non-interactive --agree-tos -m "$EMAIL" --redirect \
     || echo "!! certbot failed (DNS/port 80?). Fix DNS then re-run: certbot --nginx ${CERT_DOMAINS[*]}"
 else
   echo "==> TLS skipped. When DNS points here, run:"
-  echo "    certbot --nginx -d $DOMAIN -d www.$DOMAIN --redirect"
+  echo "    certbot --nginx ${CERT_DOMAINS[*]} --redirect"
 fi
 
 echo ""
