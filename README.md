@@ -27,8 +27,20 @@ PHPMailer updates that way.
 
 ### Deploying on nginx
 
-Production uses **nginx + php-fpm** (no Apache `.htaccess`). A ready server block is in
-[`deploy/nginx.conf`](deploy/nginx.conf):
+Production uses **nginx + php-fpm** (no Apache `.htaccess`). The repo holds a server-block
+**template** in [`deploy/nginx.conf`](deploy/nginx.conf); it is not applied automatically.
+Run the one-time provisioning script **on the VPS** to install it (domain, app path and PHP
+socket are substituted), create the deploy user, add cron jobs and optionally issue TLS:
+
+```bash
+# from a checkout of this repo on the server, as root:
+sudo ./deploy/setup-vps.sh --domain tendari.org --app-dir /var/www/tendari \
+     --user deploy --php 8.3 --email you@example.com
+```
+
+Re-run any time; it is idempotent for the nginx block and env block. Then push to `main` (or
+run the workflow) so the workflow's `VPS_DEPLOY_PATH` matches `--app-dir`. If you prefer to
+wire it manually, the Nginx server block is:
 
 ```bash
 sudo cp deploy/nginx.conf /etc/nginx/sites-available/tendari.conf
@@ -61,6 +73,18 @@ The workflow:
 2. syncs files with rsync, **preserving** `storage/app.sqlite*`, `storage/cache`, `storage/logs`
    and `storage/tenders` (plus any server-side `.env`),
 3. runs `php cron/migrate.php` and fixes `storage/` permissions on the server.
+
+HTTPS must be enabled for the domain in `SITE_URL` (a certificate for a different
+hostname makes the health check warn). With certbot:
+
+```bash
+sudo apt install certbot python3-certbot-nginx
+sudo certbot --nginx -d tendari.org -d www.tendari.org
+```
+
+The health-check step is **non-fatal** (`continue-on-error`): a TLS/DNS problem is reported
+as a workflow warning with certificate diagnostics but does not roll back a successful
+deploy. Set `SITE_URL` to `http://…` (or leave it unset) until HTTPS is configured.
 
 Configure PHP-FPM environment variables from [`deploy/php-fpm.env.example`](deploy/php-fpm.env.example)
 (the app reads config via `getenv()`, not a `.env` file). Ensure the PHP-FPM user can write to

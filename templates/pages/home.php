@@ -48,7 +48,7 @@ $live = (int)$stats['tenders'] > 0;
     <?php
       $logoDir = dirname(__DIR__, 2) . '/public/assets/sources/';
       $sources = [
-        ['Etimad', 'Saudi Arabia', null, 'https://etimad.sa', 'E'],
+        ['Etimad', 'Saudi Arabia', 'eatimad.svg', 'https://etimad.sa', 'E'],
         ['Saudi Aramco', 'Saudi Arabia', 'aramco.com.png', 'https://www.aramco.com/en/what-we-do/suppliers', 'A'],
         ['Abu Dhabi Gate', 'UAE', 'adgpg.gov.ae.png', 'https://supplier.adgpg.gov.ae', 'AD'],
         ['Dubai eSupply', 'UAE', 'esupply.dubai.gov.ae.png', 'https://esupply.dubai.gov.ae', 'D'],

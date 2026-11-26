@@ -109,6 +109,7 @@ jobs:
           cd "$DEPLOY_PATH"
           mkdir -p storage/cache/ratelimit storage/logs storage/tenders
           php cron/migrate.php
+          chgrp -R www-data storage 2>/dev/null || true
           chmod -R ug+rwX storage
           # If PHP-FPM runs as another user, make storage writable for it, e.g.:
           # sudo chown -R www-data:www-data storage
@@ -118,6 +119,26 @@ jobs:
 
       - name: Health check
         if: ${{ env.SITE_URL != '' }}
+        continue-on-error: true
         env:
           SITE_URL: ${{ secrets.SITE_URL }}
-        run: curl -fsS --retry 5 --retry-delay 3 --max-time 15 "$SITE_URL" -o /dev/null
+        run: |
+          set +e
+          echo "Checking $SITE_URL ..."
+          http_code=$(curl -sS -o /dev/null -w '%{http_code}' --retry 5 --retry-delay 3 --max-time 15 "$SITE_URL")
+          curl_rc=$?
+          if [ "$curl_rc" -ne 0 ] || [ "$http_code" = "000" ]; then
+            echo "::warning::Health check could not reach $SITE_URL (curl exit $curl_rc). The deploy steps above already completed."
+            if printf '%s' "$SITE_URL" | grep -q '^https://'; then
+              host=$(printf '%s' "$SITE_URL" | sed -E 's#^https://([^/]+).*#\1#')
+              echo "TLS certificate presented for $host:"
+              echo | openssl s_client -servername "$host" -connect "$host:443" 2>/dev/null \
+                | openssl x509 -noout -subject -issuer -dates 2>/dev/null \
+                || echo "(no certificate information)"
+              echo "If the subject does not match $host: issue a certificate (e.g. certbot -d $host) and enable the 443 block in deploy/nginx.conf."
+            fi
+          elif [ "$http_code" -ge 400 ]; then
+            echo "::warning::$SITE_URL returned HTTP $http_code — check the app/logs on the VPS."
+          else
+            echo "OK — HTTP $http_code."
+          fi

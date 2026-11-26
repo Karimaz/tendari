@@ -1,19 +1,12 @@
-# Runtime data — never commit
-storage/app.sqlite
-storage/app.sqlite-wal
-storage/app.sqlite-shm
+storage/
+!storage/migrations/
+!storage/logs/.gitkeep
+!storage/cache/.gitkeep
+vendor/
+node_modules/
 *.sqlite
 *.sqlite-wal
 *.sqlite-shm
-storage/cache/*
-!storage/cache/.gitkeep
-storage/logs/*
-!storage/logs/.gitkeep
-storage/tenders/
-
-# Composer dependencies only (public/assets/vendor IS committed — vendored Bulma/HTMX)
-/vendor/
-
-node_modules/
+storage/cache/ratelimit/
 .DS_Store
 enhancement.md
